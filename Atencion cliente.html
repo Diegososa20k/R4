@@ -384,20 +384,36 @@ class="hfeed site" id="page">
 
         </div>
         <script>
-            // Ocultar el div property-manager inicialmente
-            document.getElementById("form-field-manager").style.display = "none";
-        
-            function togglePropertyManager() {
-                var propertySelect = document.getElementById("form-field-property");
-                var propertyManagerDiv = document.getElementById("form-field-manager");
-        
-                if (propertySelect.value === "no") {
-                    propertyManagerDiv.style.display = "block";
-                } else {
-                    propertyManagerDiv.style.display = "none";
-                }
-            }
-        </script>
+			// Ocultar el div property-manager inicialmente
+			document.getElementById("form-field-manager-div").style.display = "none";
+			document.getElementById("form-field-nameMana-div").style.display = "none"; // Ocultar nameMana inicialmente
+		
+			function togglePropertyManager() {
+				var propertySelect = document.getElementById("form-field-property");
+				var propertyManagerDiv = document.getElementById("form-field-manager-div");
+				var nameManaDiv = document.getElementById("form-field-nameMana-div"); // Div que contiene el campo nameMana
+		
+				if (propertySelect.value === "no") {
+					propertyManagerDiv.style.display = "block";
+				} else {
+					propertyManagerDiv.style.display = "none";
+					nameManaDiv.style.display = "none"; // Ocultar nameMana cuando el manager es "no"
+				}
+			}
+		
+			function toggleNameMana() {
+				var managerSelect = document.getElementById("form-field-manager");
+				var nameManaDiv = document.getElementById("form-field-nameMana-div");
+		
+				if (managerSelect.value === "yes") {
+					nameManaDiv.style.display = "block"; // Mostrar nameMana cuando el manager es "yes"
+				} else {
+					nameManaDiv.style.display = "none"; // Ocultar nameMana cuando el manager es "no"
+				}
+			}
+		
+		</script>
+		
     
     <script>
         // Hacer la solicitud HTTP a la API para ver los desarrollos
@@ -419,15 +435,16 @@ class="hfeed site" id="page">
             });
     </script>
     <script>
-		function validateForm() {
+		async function validateForm() {
             var property = document.getElementById('form-field-property').value;
-			var manager = document.getElementById('form-field-manager').value;
+			//var manager = document.getElementById('form-field-manager').value;
             var name = document.getElementById('form-field-name').value;
+			var nameMana = document.getElementById('form-field-nameMana').value;
             var email = document.getElementById('form-field-email').value;
             var cellphone = document.getElementById('form-field-cellphone').value;
             var development_id = document.getElementById('form-field-development').value;
 			var unit = document.getElementById('form-field-unit').value;
-            var date = document.getElementById('form-field-date').value;
+            var date = document.getElementById('form-field-date').value;  
            // var delivered = document.getElementById('form-field-delivered').value;
 
             // Verificar si algún campo de texto está vacío
@@ -445,12 +462,53 @@ class="hfeed site" id="page">
                 return false;
             }
 
+			// Obtener el valor del campo "manager" si está disponible
+			var manager = ""; // Inicializamos manager como cadena vacía
+			var propertyManagerDiv = document.getElementById("form-field-manager-div");
+
+			if (propertySelect.value === "no") {
+				manager = document.getElementById('form-field-manager').value;
+			}
+
 
 			// Obtener valores de los campos de solicitud 1 y pasarlos en array
             var location = document.getElementById('form-field-location').value;
             var failing = document.getElementById('form-field-failing').value;
             var problem = document.getElementById('form-field-problem').value;
             var reported = document.getElementById('form-field-reported').value;
+			//var file = document.getElementById('form-field-file').value;
+
+			var files1 = document.getElementById('form-field-file').files;
+			var files2 = document.getElementById('form-field-file2').files;
+			var files3 = document.getElementById('form-field-file3').files;
+
+			var fileBase64Array1 = await Promise.all(Array.from(files1).map(async (file) => {
+				return new Promise((resolve, reject) => {
+					var reader = new FileReader();
+					reader.readAsDataURL(file);
+					reader.onload = () => resolve(reader.result);
+					reader.onerror = error => reject(error);
+				});
+			}));
+
+			var fileBase64Array2 = await Promise.all(Array.from(files2).map(async (file) => {
+				return new Promise((resolve, reject) => {
+					var reader = new FileReader();
+					reader.readAsDataURL(file);
+					reader.onload = () => resolve(reader.result);
+					reader.onerror = error => reject(error);
+				});
+			}));
+
+			var fileBase64Array3 = await Promise.all(Array.from(files3).map(async (file) => {
+				return new Promise((resolve, reject) => {
+					var reader = new FileReader();
+					reader.readAsDataURL(file);
+					reader.onload = () => resolve(reader.result);
+					reader.onerror = error => reject(error);
+				});
+			}));
+
 
             // Verificar si se ha seleccionado una opción para todos los campos de solicitud
             if (location === "" || failing === "" || problem === "" || reported === "") {
@@ -463,7 +521,9 @@ class="hfeed site" id="page">
                 location: location,
                 failing: failing,
                 problem: problem,
-                reported: reported
+                reported: reported,
+				//file: file
+				files: fileBase64Array1.map(file => file.substring(file.indexOf(',') + 1))
             };
 			
 			// Almacenar los valores de la solicitud 2 si no están vacíos
@@ -471,6 +531,7 @@ class="hfeed site" id="page">
 			var failing2 = document.getElementById('form-field-failing2').value;
 			var problem2 = document.getElementById('form-field-problem2').value;
 			var reported2 = document.getElementById('form-field-reported2').value;
+			//var file2 = document.getElementById('form-field-file2').value;
 
 			var request2 = null; // Inicializar como nulo
 
@@ -480,7 +541,8 @@ class="hfeed site" id="page">
 					location: location2,
 					failing: failing2,
 					problem: problem2,
-					reported: reported2
+					reported: reported2,
+					files: fileBase64Array2.map(file => file.substring(file.indexOf(',') + 1))
 				};
 			}
 
@@ -489,16 +551,18 @@ class="hfeed site" id="page">
 			var failing3 = document.getElementById('form-field-failing3').value;
 			var problem3 = document.getElementById('form-field-problem3').value;
 			var reported3 = document.getElementById('form-field-reported3').value;
+			//var file3 = document.getElementById('form-field-file3').value;
 
 			var request3 = null; // Inicializar como nulo
 
-			if (location3 !== "" && failing3 !== "" && problem3 !== "" && reported3 !== "") {
+			if (location3 !== "" && failing3 !== "" && problem3 !== "" && reported3 !== "" ) {
 				// Si alguno de los campos no está vacío, crear el objeto de la solicitud 3
 				request3 = {
 					location: location3,
 					failing: failing3,
 					problem: problem3,
-					reported: reported3
+					reported: reported3,
+					files: fileBase64Array3.map(file => file.substring(file.indexOf(',') + 1))
 				};
 			}
 
@@ -523,6 +587,7 @@ class="hfeed site" id="page">
                 property: property,
 				manager: manager,
                 name: name,
+				nameMana: nameMana,
                 email: email,
                 cellphone: cellphone,
 				development_id: development_id,
@@ -551,6 +616,33 @@ class="hfeed site" id="page">
 					text: 'La solicitud se ha enviado con éxito',
 					icon: 'success'
 				});
+
+				document.getElementById('form-field-property').value = '';
+				document.getElementById('form-field-name').value = '';
+				document.getElementById('form-field-nameMana').value = '';
+				document.getElementById('form-field-email').value = '';
+				document.getElementById('form-field-cellphone').value = '';
+				document.getElementById('form-field-development').value = '';
+				document.getElementById('form-field-unit').value = '';
+				document.getElementById('form-field-date').value = '';
+				document.getElementById('form-field-location').value = '';
+				document.getElementById('form-field-failing').value = '';
+				document.getElementById('form-field-problem').value = '';
+				document.getElementById('form-field-reported').value = '';
+				document.getElementById('form-field-location2').value = '';
+				document.getElementById('form-field-failing2').value = '';
+				document.getElementById('form-field-problem2').value = '';
+				document.getElementById('form-field-reported2').value = '';
+				document.getElementById('form-field-location3').value = '';
+				document.getElementById('form-field-failing3').value = '';
+				document.getElementById('form-field-problem3').value = '';
+				document.getElementById('form-field-reported3').value = '';
+				document.getElementById('form-field-file').value = '';
+				document.getElementById('form-field-file2').value = '';
+				document.getElementById('form-field-file3').value = '';
+
+				document.getElementById('form-field-manager-div').style.display = 'none';
+				document.getElementById('form-field-nameMana-div').style.display = 'none';
 			})
 			.catch(error => {
 				// Manejar errores
@@ -562,35 +654,6 @@ class="hfeed site" id="page">
 		}
 	
 	</script>
-
-<script>
-    // Ocultar el div de nombre inicialmente
-    document.getElementById("form-field-name").style.display = "none";
-
-    function togglePropertyManager() {
-        var propertySelect = document.getElementById("form-field-property");
-        var propertyManagerDiv = document.getElementById("form-field-manager");
-
-        if (propertySelect.value === "no") {
-            propertyManagerDiv.style.display = "block";
-        } else {
-            propertyManagerDiv.style.display = "none";
-            // Cuando se oculta el div del administrador, también ocultamos el div del nombre
-            document.getElementById("form-field-name").style.display = "none";
-        }
-    }
-
-    function toggleNameVisibility() {
-        var managerSelect = document.getElementById("manager-select");
-        var nameDiv = document.getElementById("form-field-name");
-
-        if (managerSelect.value === "yes") {
-            nameDiv.style.display = "block";
-        } else {
-            nameDiv.style.display = "none";
-        }
-    }
-</script>
 
 <!-- <script>
 	function validateForm() {
@@ -792,29 +855,35 @@ class="post-180 page type-page status-publish ast-article-single" id="post-180" 
 			<p>Please complete the form below:</p>
 			<!--Mi formulario-->
             <form class="elementor-form-fields-wrapper elementor-labels-above">
-				<div class="elementor-field-type-select elementor-field-group elementor-column elementor-field-group-property elementor-col-100 elementor-field-required input">
-                    <label for="form-field-property" class="elementor-field-label">Do I own the property?</label>
-                    <select name="form_fields[property]" id="form-field-property" class="elementor-field elementor-size-xs elementor-field-textual" required="required" aria-required="true" onchange="togglePropertyManager()">
-                        <option value="">Seleccionar</option>
-                        <option value="yes">Si</option>
-                        <option value="no">No</option>
-                    </select>
-                </div>
-
-				
-                <div class="elementor-field-type-select elementor-field-group elementor-column elementor-field-group-manager elementor-col-100" id="form-field-manager" style="display: none;">
-					<label for="form-field-manager" type="select" class="elementor-field-label">Are you a property manager?</label>
-					<select name="form_fields[manager]" id="manager-select" class="elementor-field elementor-size-xs elementor-field-textual" onchange="toggleNameVisibility()">
+                <div class="elementor-field-type-select elementor-field-group elementor-column elementor-field-group-property elementor-col-100 elementor-field-required input">
+					<label for="form-field-property" class="elementor-field-label">Do I own the property?</label>
+					<select name="form_fields[property]" id="form-field-property" class="elementor-field elementor-size-xs elementor-field-textual" required="required" aria-required="true" onchange="togglePropertyManager()">
 						<option value="">Seleccionar</option>
 						<option value="yes">Si</option>
 						<option value="no">No</option>
 					</select>
 				</div>
 				
-				<div class="elementor-field-type-text elementor-field-group elementor-column elementor-field-group-name elementor-col-100 elementor-field-required input" id="form-field-name" style="display: none;">
-					<label for="form-field-name" class="elementor-field-label">Full Name</label>
-					<input size="1" type="text" name="form_fields[name]" class="elementor-field elementor-size-xs  elementor-field-textual" required="required" aria-required="true">
+				<div class="elementor-field-type-select elementor-field-group elementor-column elementor-field-group-manager elementor-col-100" id="form-field-manager-div" style="display: none;">
+					<label for="form-field-manager" type="select" class="elementor-field-label">Are you a property manager?</label>
+					<select name="form_fields[manager]" id="form-field-manager" class="elementor-field elementor-size-xs elementor-field-textual" onchange="toggleNameMana()">
+						<option value="">Seleccionar</option>
+						<option value="yes">Si</option>
+						<option value="no">No</option>
+					</select>
 				</div>
+				
+				<div class="elementor-field-type-textarea elementor-field-group elementor-column elementor-field-group-nameMana elementor-col-100 elementor-field-required input" id="form-field-nameMana-div" style="display: none;">
+					<label for="form-field-nameMana" type="text" class="elementor-field-label">Full name manager</label>
+					<input name="form_fields[nameMana]" id="form-field-nameMana" class="elementor-field elementor-size-xs elementor-field-textual">
+				</div>
+				
+
+            
+                <div class="elementor-field-type-text elementor-field-group elementor-column elementor-field-group-name elementor-col-100 elementor-field-required input">
+                    <label for="form-field-name" class="elementor-field-label">Full Name</label>
+                    <input size="1" type="text" name="form_fields[name]" id="form-field-name" class="elementor-field elementor-size-xs  elementor-field-textual" required="required" aria-required="true">
+                </div>
             
                 <div class="elementor-field-type-email elementor-field-group elementor-column elementor-field-group-email elementor-col-100 elementor-field-required input">
                     <label for="form-field-email" class="elementor-field-label">Email</label>
@@ -1043,7 +1112,7 @@ class="post-180 page type-page status-publish ast-article-single" id="post-180" 
 				</div>
             
                 <div class="elementor-field-group elementor-column elementor-field-type-submit elementor-col-25 e-form__buttons">
-                    <button type="submit" id="submit" class="elementor-button elementor-size-sm" onclick="return validateForm()">
+                    <button type="button" id="submit" class="elementor-button elementor-size-sm" onclick="return validateForm()">
                         <span>
                             <span class=" elementor-button-icon"></span>
                             <span class="elementor-button-text">Enviar</span>

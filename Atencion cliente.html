@@ -523,7 +523,10 @@ class="hfeed site" id="page">
                 problem: problem,
                 reported: reported,
 				//file: file
-				files: fileBase64Array1.map(file => file.substring(file.indexOf(',') + 1))
+				files: fileBase64Array1.map((file, index) => ({
+					codigo: file.substring(file.indexOf(',') + 1),
+					nombre: files1[index].name // Obtiene el nombre del archivo con su extensión
+				}))
             };
 			
 			// Almacenar los valores de la solicitud 2 si no están vacíos
@@ -542,7 +545,10 @@ class="hfeed site" id="page">
 					failing: failing2,
 					problem: problem2,
 					reported: reported2,
-					files: fileBase64Array2.map(file => file.substring(file.indexOf(',') + 1))
+					files: fileBase64Array2.map((file, index) => ({
+						codigo: file.substring(file.indexOf(',') + 1),
+						nombre: files2[index].name // Obtiene el nombre del archivo con su extensión
+					}))
 				};
 			}
 
@@ -562,7 +568,10 @@ class="hfeed site" id="page">
 					failing: failing3,
 					problem: problem3,
 					reported: reported3,
-					files: fileBase64Array3.map(file => file.substring(file.indexOf(',') + 1))
+					files: fileBase64Array3.map((file, index) => ({
+						codigo: file.substring(file.indexOf(',') + 1),
+						nombre: files3[index].name // Obtiene el nombre del archivo con su extensión
+					}))
 				};
 			}
 
